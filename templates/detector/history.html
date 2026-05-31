@@ -1,0 +1,26 @@
+{% extends 'detector/base.html' %}
+{% block title %}History | Pinhole Detector{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Inspection archive</p>
+        <h1>Image History</h1>
+        <p class="muted">Every ESP32-CAM upload is stored locally in the media folder and indexed here.</p>
+    </div>
+</section>
+
+<section class="history-grid">
+    {% for capture in captures %}
+        <article class="capture-card">
+            <img src="{{ capture.image.url }}" alt="Capture {{ capture.id }}">
+            <div>
+                <strong>#{{ capture.id }} {{ capture.get_status_display }}</strong>
+                <span>{{ capture.created_at|date:'M d, Y H:i:s' }}</span>
+                <span>{{ capture.device_id|default:'esp32-cam' }}</span>
+            </div>
+        </article>
+    {% empty %}
+        <div class="empty-state">No captures have been received yet.</div>
+    {% endfor %}
+</section>
+{% endblock %}

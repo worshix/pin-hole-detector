@@ -1,0 +1,44 @@
+{% extends 'detector/base.html' %}
+{% block title %}Dashboard | Pinhole Detector{% endblock %}
+{% block content %}
+<section class="hero-card">
+    <div>
+        <p class="eyebrow">Live production monitoring</p>
+        <h1>Plastic Roll Pinhole Detection</h1>
+        <p class="muted">Control the ESP32 line, receive ESP32-CAM images, and prepare high-quality training data for your defect model.</p>
+    </div>
+    <div class="controls">
+        <form method="post" action="{% url 'control_machine' 'start' %}">{% csrf_token %}<button class="btn start">Start Capture</button></form>
+        <form method="post" action="{% url 'control_machine' 'stop' %}">{% csrf_token %}<button class="btn stop">Stop Capture</button></form>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card"><span>Machine State</span><strong>{{ machine_state|title }}</strong><small>Updated {{ last_updated|date:'H:i:s' }}</small></article>
+    <article class="stat-card"><span>Total Images</span><strong>{{ total_images }}</strong><small>Stored for training</small></article>
+    <article class="stat-card"><span>Defects</span><strong>{{ defect_count }}</strong><small>Awaiting model integration</small></article>
+    <article class="stat-card"><span>Pinholes</span><strong>{{ total_pinholes }}</strong><small>Manual/model count</small></article>
+</section>
+
+<section class="dashboard-grid">
+    <article class="panel large">
+        <div class="panel-header"><div><p class="eyebrow">Latest ESP32-CAM frame</p><h2>Camera Feed</h2></div><span class="pill">/api/images/receive</span></div>
+        {% if latest_capture %}
+            <img class="latest-image" src="{{ latest_capture.image.url }}" alt="Latest capture">
+            <div class="image-meta"><span>{{ latest_capture.created_at|date:'M d, Y H:i:s' }}</span><span>{{ latest_capture.device_id }}</span><span>{{ latest_capture.get_status_display }}</span></div>
+        {% else %}
+            <div class="empty-state">No images received yet. Start the system and power the ESP32-CAM.</div>
+        {% endif %}
+    </article>
+    <article class="panel">
+        <div class="panel-header"><div><p class="eyebrow">Recent captures</p><h2>Training Set</h2></div></div>
+        <div class="thumb-grid">
+            {% for capture in recent_captures %}
+                <a href="{{ capture.image.url }}"><img src="{{ capture.image.url }}" alt="Capture {{ capture.id }}"></a>
+            {% empty %}
+                <p class="muted">Images will appear here automatically.</p>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}
