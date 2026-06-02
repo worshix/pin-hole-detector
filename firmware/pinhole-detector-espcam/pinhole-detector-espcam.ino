@@ -26,7 +26,7 @@ const char *serverUrl = "http://192.168.131.85:8000/api/images/receive/";
 const char *mqttServer = "192.168.131.85";
 const int mqttPort = 1883;
 const char *mqttClientId = "pinhole-espcam";
-const char *commandTopic = "pinhole/control";
+const char *commandTopic = "pinhole/state";
 const char *statusTopic = "pinhole/espcam/status";
 
 WiFiClient wifiClient;
@@ -62,13 +62,13 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length) {
   Serial.print(": ");
   Serial.println(message);
 
-  if (message == "start") {
+  if (message == "running") {
     capturing = true;
     Serial.println("[CONTROL] Capture started");
     publishStatus("capturing");
   }
 
-  if (message == "stop") {
+  if (message == "stopped") {
     capturing = false;
     Serial.println("[CONTROL] Capture stopped");
     publishStatus("idle");
