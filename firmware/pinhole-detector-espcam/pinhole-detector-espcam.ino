@@ -22,8 +22,8 @@
 
 const char *wifiSsid = "pinhole-detector";
 const char *wifiPassword = "pinhole123";
-const char *serverUrl = "http://10.170.85.12:8000/api/images/receive/";
-const char *mqttServer = "10.170.85.12";
+const char *serverUrl = "http://192.168.131.85:8000/api/images/receive/";
+const char *mqttServer = "192.168.131.85";
 const int mqttPort = 1883;
 const char *mqttClientId = "pinhole-espcam";
 const char *commandTopic = "pinhole/control";

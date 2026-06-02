@@ -18,7 +18,7 @@ const char* wifiSsid = "pinhole-detector";
 const char* wifiPassword = "pinhole123";
 
 // MQTT settings (same broker as ESP32-CAM)
-const char* mqttServer = "10.170.85.12";
+const char* mqttServer = "192.168.131.85";
 const int mqttPort = 1883;
 const char* mqttClientId = "pinhole-esp32";
 const char* topicState = "pinhole/state";
@@ -47,6 +47,7 @@ const unsigned long ldrInterval = 100;
 unsigned long buzzerStartTime = 0;
 bool buzzerActive = false;
 const unsigned long buzzerDuration = 2000;
+
 
 void setup() {
   Serial.begin(115200);
@@ -98,6 +99,7 @@ void loop() {
   // Check MQTT
   if (!mqttClient.connected()) {
     Serial.println("[MQTT] Reconnecting...");
+    updateLcdLine(3, "MQTT: Reconnecting..");
     connectMqtt();
   }
   mqttClient.loop();
@@ -157,18 +159,19 @@ void connectMqtt() {
     Serial.print(mqttServer);
     Serial.print(":");
     Serial.println(mqttPort);
+    updateLcdLine(3, "MQTT: Connecting....");
 
     if (mqttClient.connect(mqttClientId)) {
       Serial.println("[MQTT] Connected");
       mqttClient.subscribe(topicControl);
       Serial.print("[MQTT] Subscribed to ");
       Serial.println(topicControl);
-
-      // Publish current state
+      updateLcdLine(3, "MQTT: Connected     ");
       publishState();
     } else {
       Serial.print("[MQTT] Failed, state=");
       Serial.println(mqttClient.state());
+      updateLcdLine(3, "MQTT: Failed-retry..");
       delay(2000);
     }
   }

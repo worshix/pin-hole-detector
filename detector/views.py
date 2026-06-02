@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from .analysis import detect_black_spots
 from .models import Capture, SystemState
 from .mqtt import publish_control
 
@@ -78,4 +79,21 @@ def receive_image(request):
         return JsonResponse({'detail': 'No JPEG image was received.'}, status=400)
 
     SystemState.objects.update_or_create(key='last_camera_upload', defaults={'value': str(capture.id)})
-    return JsonResponse({'ok': True, 'id': capture.id, 'image_url': capture.image.url}, status=201)
+
+    # Run black-spot analysis on the saved image
+    try:
+        result = detect_black_spots(capture.image.path)
+        capture.status = result['status']
+        capture.notes = result['notes']
+        capture.save(update_fields=['status', 'notes'])
+    except Exception as exc:
+        capture.notes = f'Analysis error: {exc}'
+        capture.save(update_fields=['notes'])
+
+    return JsonResponse({
+        'ok': True,
+        'id': capture.id,
+        'image_url': capture.image.url,
+        'status': capture.status,
+        'notes': capture.notes,
+    }, status=201)
